@@ -6,8 +6,9 @@ import com.luv2code.hibernate.demo.entity.InstructorDetail;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
-public class GetInstructorsCoursesDemo {
+public class FetchJoinDemo {
 
     public static void main(String[]args){
 
@@ -28,18 +29,35 @@ public class GetInstructorsCoursesDemo {
             //start a transaction
             session.beginTransaction ();
 
+            //opt2: Hibernate query with HQL
+
+
           //get the inbstructor from db
             int theId =1;
 
-            Instructor tempInstructor = session.get ( Instructor.class,theId );
+
+            Query<Instructor> query = session.createQuery ( "select i from Instructor i "
+                                                                        +"JOIN FETCH i.courses "
+                                                                        +"where i.id=:theInstructorId",Instructor.class);
+
+            //set parameter on query
+            query.setParameter ( "theInstructorId", theId );
+
+            //exeecute query and get instructor
+            Instructor tempInstructor =query.getSingleResult ();
 
             System.out.println ("Instructor: " +tempInstructor);
 
-            System.out.println ("Courses: " +tempInstructor.getCourses ());
+
 
 
             //commit transaction
             session.getTransaction ().commit ();
+
+            session.close ();
+            System.out.println ("\nThe session is now closed\n");
+
+            System.out.println ("Courses: " +tempInstructor.getCourses ());
             System.out.println ("Done!!!");
 
         }
